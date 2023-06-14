@@ -45,15 +45,32 @@ func (d *Database) Initialize() error {
 	return nil
 }
 
+func (d *Database) Login(username string, password string) (bool, error) {
+	query := "SELECT COUNT(*) FROM users WHERE username = ? AND password = ?"
+
+	var count int
+	err := d.db.QueryRow(query, username, password).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
 func (d *Database) CreateToken(name string, limit int) (string, error) {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	const tokenLength = 10
 
-	rand.Seed(time.Now().UnixNano())
+	source := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(source)
 
 	token := make([]byte, tokenLength)
 	for i := 0; i < tokenLength; i++ {
-		token[i] = charset[rand.Intn(len(charset))]
+		token[i] = charset[random.Intn(len(charset))]
 	}
 
 	var limitValue interface{}
@@ -109,7 +126,7 @@ func (d *Database) GetTokenHistory(token string) ([]models.TokenHistory, error) 
 	history := []models.TokenHistory{}
 	for rows.Next() {
 		var record models.TokenHistory
-		err := rows.Scan(&record.ID, &record.Token, &record.Time, &record.Result, &record.Request)
+		err := rows.Scan(&record.ID, &record.Token, &record.RequestTime, &record.Result, &record.Request)
 		if err != nil {
 			return nil, err
 		}

@@ -10,7 +10,7 @@ CREATE TABLE messages (
     margin VARCHAR(255),
     sl VARCHAR(255),
     timestamp INT,
-    exit BOOL,
+    `exit` BOOL,
     risk BOOL
 );
 
@@ -29,3 +29,11 @@ CREATE TABLE history (
   result VARCHAR(255),
   request VARCHAR(255)
 );
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+INSERT into users (username,password) Values ("admin","UEyqG!bAg$C");

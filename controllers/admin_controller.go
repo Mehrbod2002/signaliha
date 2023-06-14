@@ -1,37 +1,72 @@
 package controllers
 
 import (
-	"arz/models"
 	"arz/utils"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AdminController struct {
-	// Define any additional fields or dependencies needed by the admin controllers
+	db *utils.Database
 }
 
-// CreateToken handles the creation of a token
+func NewAdminController(db *utils.Database) *AdminController {
+	return &AdminController{
+		db: db,
+	}
+}
+
 func (ac *AdminController) CreateToken(c *gin.Context) {
-	var token models.Token
-	if err := c.ShouldBindJSON(&token); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	db := &utils.Database{}
+
+	err := db.Initialize()
+	if err != nil {
+		log.Fatal("Failed to initialize the database:", err)
+	}
+
+	defer db.Close()
+	name := c.PostForm("name")
+	limit := c.PostForm("limit")
+
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid name"})
 		return
 	}
 
-	// Call the utility function to create the token
-	if err := utils.CreateToken(&token); err != nil {
+	var limitValue int
+	if limit == "" || limit == "-1" {
+		limitValue = -1
+	} else {
+		limitValue, err = strconv.Atoi(limit)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit"})
+			return
+		}
+	}
+
+	token, err := db.CreateToken(name, limitValue)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Token created successfully"})
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK, "token": token, "message": "Token created successfully"})
 }
 
-// GetTokens retrieves all tokens
 func (ac *AdminController) GetTokens(c *gin.Context) {
-	tokens, err := utils.GetTokens()
+	db := &utils.Database{}
+
+	err := db.Initialize()
+	if err != nil {
+		log.Fatal("Failed to initialize the database:", err)
+	}
+
+	defer db.Close()
+	tokens, err := db.GetTokens()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -40,11 +75,23 @@ func (ac *AdminController) GetTokens(c *gin.Context) {
 	c.JSON(http.StatusOK, tokens)
 }
 
-// GetTokenHistory retrieves the history of a specific token
 func (ac *AdminController) GetTokenHistory(c *gin.Context) {
-	token := c.Param("token")
+	db := &utils.Database{}
 
-	history, err := utils.GetTokenHistory(token)
+	err := db.Initialize()
+	if err != nil {
+		log.Fatal("Failed to initialize the database:", err)
+	}
+
+	defer db.Close()
+
+	token := c.Param("token")
+	if token == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"status": http.StatusBadRequest, "error": "Invalid token"})
+		return
+	}
+
+	history, err := db.GetTokenHistory(token)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

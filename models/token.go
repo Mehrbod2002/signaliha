@@ -11,8 +11,10 @@ type Token struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-type TokenRequest struct {
+type TokenHistory struct {
 	ID          int       `json:"id"`
 	Token       string    `json:"token"`
 	RequestTime time.Time `json:"requestTime"`
+	Result      string    `json:"result"`
+	Request     string    `json:"request"`
 }

@@ -4,8 +4,7 @@ import (
 	"arz/controllers"
 	"net/http"
 
-	"github.com/didip/tollbooth/v6"
-	"github.com/didip/tollbooth_gin/v3"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,33 +16,38 @@ func LimitHandler(c *gin.Context) {
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	limiter := tollbooth.NewLimiter(10, nil)
-	r.Use(tollbooth_gin.LimitHandler(limiter))
-	r.Use(tollbooth_gin.TollboothMiddleware(limiter))
+	// limiter := tollbooth.NewLimiter(10, nil)
+	// r.Use(tollbooth_gin.LimitHandler(limiter))
+	// r.Use(tollbooth_gin.TollboothMiddleware(limiter))
+
+	// Public routes
+	userController := &controllers.UserController{}
+	adminController := &controllers.AdminController{}
+	r.POST("/login", userController.Login)
 
 	admin := r.Group("/admin")
 	admin.Use(AdminAuthMiddleware()) // Middleware for admin authentication
 	{
-		admin.POST("/tokens", controllers.CreateToken)
-		admin.GET("/tokens", controllers.GetTokens)
-		admin.GET("/tokens/:token/history", controllers.GetTokenHistory)
+		admin.POST("/tokens", adminController.CreateToken)
+		admin.GET("/tokens", adminController.GetTokens)
+		admin.GET("/tokens/:token/history", adminController.GetTokenHistory)
 	}
 
-	r.NoRoute(LimitHandler)
+	// r.NoRoute(LimitHandler) // Uncomment this line if LimitHandler is defined
+
 	return r
 }
 
 func AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Implement your admin authentication logic here
-		// You can check if the user is authenticated as an admin
-		// If not, you can return an error or redirect to a login page
-		// Example:
-		// if !isAdminAuthenticated(c) {
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		// 	c.Abort()
-		// 	return
-		// }
+		session := sessions.Default(c)
+		userID := session.Get("user_id")
+
+		if userID == nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
 
 		c.Next()
 	}
