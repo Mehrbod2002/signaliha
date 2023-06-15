@@ -17,8 +17,9 @@ CREATE TABLE messages (
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
+    `limit` INT DEFAULT -1,
     token VARCHAR(255) NOT NULL,
-    limit INT DEFAULT -1,
+    last_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -30,10 +31,10 @@ CREATE TABLE history (
   request VARCHAR(255)
 );
 
-CREATE TABLE users (
+CREATE TABLE admins (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL
 );
 
-INSERT into users (username,password) Values ("admin","UEyqG!bAg$C");
+INSERT into admins (username,password) Values ("admin","UEyqG!bAg$C");

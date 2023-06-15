@@ -18,3 +18,19 @@ type TokenHistory struct {
 	Result      string    `json:"result"`
 	Request     string    `json:"request"`
 }
+
+type Message struct {
+	ID           int
+	MessageID    int
+	Coin         string
+	BaseCurrency string
+	Platform     string
+	Leverage     string
+	Side         string
+	Entries      string
+	Margin       string
+	SL           string
+	Timestamp    int
+	Exit         bool
+	Risk         bool
+}
