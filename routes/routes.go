@@ -4,11 +4,11 @@ import (
 	"arz/controllers"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 func SetupRouter() *gin.Engine {
