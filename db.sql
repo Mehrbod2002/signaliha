@@ -1,3 +1,9 @@
+CREATE database arz;
+
+CREATE USER 'signal'@'localhost' identified by 'DtrPuxeHW6wWQ#g^';
+
+GRANT all privileges on *.* to 'signal'@'localhost' ;
+
 CREATE TABLE messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     message_id INT,

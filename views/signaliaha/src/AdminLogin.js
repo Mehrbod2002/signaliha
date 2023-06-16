@@ -28,7 +28,7 @@ const AdminLogin = ({ onLogin }) => {
         formData.append('username', username);
         formData.append('password', password);
         axios.defaults.withCredentials = true;
-        const response = await axios.post('http://localhost:8080/login', formData, {
+        const response = await axios.post('http://signaliha.com:8080/login', formData, {
             headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             },
