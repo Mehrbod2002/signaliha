@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Typography, Button, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Typography, Button, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import TokenForm from './CreateToken';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Home = ({ onLogout }) => {
     const [tokens, setTokens] = useState([]);
@@ -18,10 +19,9 @@ const Home = ({ onLogout }) => {
     const fetchTokens = async () => {
       try {
         const token = localStorage.getItem('token');
-  
-        const response = await axios.get('http://localhost:8080/admin/tokens', {
+        const response = await axios.get('http://signaliha.com/admin/tokens', {
           headers: {
-            Authorization: token,
+            "Authorization": token,
           },
           withCredentials: true,
         });
@@ -56,7 +56,7 @@ const Home = ({ onLogout }) => {
       try {
         const formData = new URLSearchParams();
         formData.append('token', token);
-        const response = await axios.post(`http://localhost:8080/admin/tokens/delete`, formData, {
+        const response = await axios.post(`http://signaliha.com/admin/tokens/delete`, formData, {
           headers: {
             "Authorization": localStorage.getItem('token'),
           },
@@ -78,11 +78,11 @@ const Home = ({ onLogout }) => {
         try {
             const formData = new URLSearchParams();
             formData.append('token', token);
-            const response = await axios.get(`http://localhost:8080/admin/tokens/${token}/history`, formData, {
-                headers: {
-                    "Authorization": localStorage.getItem('token'),
-                },
-                withCredentials: true,
+            const response = await axios.get(`http://signaliha.com/admin/tokens/${token}/history`, {
+              headers: {
+                "Authorization": localStorage.getItem('token'),
+              },
+              withCredentials: true,
             });
   
             if (response.status === 200) {
@@ -135,6 +135,9 @@ const Home = ({ onLogout }) => {
             </TableBody>
           </Table>
         </Box>
+        <Button variant="contained" component={Link} to="/datas" style={{ marginTop: '1rem' }}>
+          Datas
+        </Button>
         <Button variant="contained" onClick={handleOpenTokenForm} style={{ marginTop: '1rem' }}>
           Create Token
         </Button>

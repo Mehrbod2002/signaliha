@@ -28,7 +28,7 @@ const TokenForm = ({ onSubmit }) => {
 
         const token = localStorage.getItem('token');
 
-        const response = await axios.post('http://localhost:8080/admin/tokens', formData, {
+        const response = await axios.post('http://signaliha.com/admin/tokens', formData, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             "Authorization":token,

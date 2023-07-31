@@ -9,7 +9,7 @@ import (
 func main() {
 	router := routes.SetupRouter()
 
-	err := router.Run(":8080")
+	err := router.Run(":80")
 	if err != nil {
 		log.Fatal("Error starting server:", err.Error())
 	}

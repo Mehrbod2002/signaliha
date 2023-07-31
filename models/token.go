@@ -29,6 +29,7 @@ type Message struct {
 	Side         string
 	Entries      string
 	Margin       string
+	Tp           string
 	SL           string
 	Timestamp    int
 	Exit         bool

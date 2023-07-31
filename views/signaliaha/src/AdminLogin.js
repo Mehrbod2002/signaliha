@@ -28,7 +28,7 @@ const AdminLogin = ({ onLogin }) => {
         formData.append('username', username);
         formData.append('password', password);
         axios.defaults.withCredentials = true;
-        const response = await axios.post('http://signaliha.com:8080/login', formData, {
+        const response = await axios.post('http://signaliha.com/login', formData, {
             headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             },
@@ -42,7 +42,6 @@ const AdminLogin = ({ onLogin }) => {
           toast.error(JSON.parse(errorMessage).message);
         }
       } catch (error) {
-        console.error('An error occurred during login:', error);
         toast.error('An error occurred during login');
       }      
   };

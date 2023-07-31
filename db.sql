@@ -14,6 +14,7 @@ CREATE TABLE messages (
     side VARCHAR(50),
     entries VARCHAR(255),
     margin VARCHAR(255),
+    tp VARCHAR(255),
     sl VARCHAR(255),
     timestamp INT,
     `exit` BOOL,

@@ -75,7 +75,7 @@ func (d *Database) CreateToken(name string, limit int) (string, error) {
 
 	var limitValue interface{}
 	if limit == -1 {
-		limitValue = nil
+		limitValue = -1
 	} else {
 		limitValue = limit
 	}
@@ -165,10 +165,10 @@ func (d *Database) GetLastID(token string) (*int, error) {
 }
 
 func (d *Database) GetLastMessage() (*models.Message, error) {
-	query := "SELECT message_id, coin, base_currency, platform, leverage, side, entries, margin, sl, timestamp, `exit`, risk FROM messages ORDER BY message_id DESC LIMIT 1"
+	query := "SELECT message_id, coin, base_currency, platform, leverage, side, entries, margin, tp, sl, timestamp, `exit`, risk FROM messages ORDER BY message_id DESC LIMIT 1"
 
 	var message models.Message
-	err := d.db.QueryRow(query).Scan(&message.MessageID, &message.Coin, &message.BaseCurrency, &message.Platform, &message.Leverage, &message.Side, &message.Entries, &message.Margin, &message.SL, &message.Timestamp, &message.Exit, &message.Risk)
+	err := d.db.QueryRow(query).Scan(&message.MessageID, &message.Coin, &message.BaseCurrency, &message.Platform, &message.Leverage, &message.Side, &message.Entries, &message.Margin, &message.Tp, &message.SL, &message.Timestamp, &message.Exit, &message.Risk)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func (d *Database) UpdateLastID(token string, lastID int) error {
 }
 
 func (d *Database) GetMessagesAfterID(lastID int) ([]models.Message, error) {
-	query := "SELECT message_id, coin, base_currency, platform, leverage, side, entries, margin, sl, timestamp, `exit`, risk FROM messages WHERE message_id > ?"
+	query := "SELECT message_id, coin, base_currency, platform, leverage, side, entries, margin, tp, sl, timestamp, `exit`, risk FROM messages WHERE message_id > ?"
 
 	rows, err := d.db.Query(query, lastID)
 	if err != nil {
@@ -204,7 +204,7 @@ func (d *Database) GetMessagesAfterID(lastID int) ([]models.Message, error) {
 	messages := []models.Message{}
 	for rows.Next() {
 		var message models.Message
-		err := rows.Scan(&message.MessageID, &message.Coin, &message.BaseCurrency, &message.Platform, &message.Leverage, &message.Side, &message.Entries, &message.Margin, &message.SL, &message.Timestamp, &message.Exit, &message.Risk)
+		err := rows.Scan(&message.MessageID, &message.Coin, &message.BaseCurrency, &message.Platform, &message.Leverage, &message.Side, &message.Entries, &message.Margin, &message.Tp, &message.SL, &message.Timestamp, &message.Exit, &message.Risk)
 		if err != nil {
 			return nil, err
 		}
@@ -225,25 +225,52 @@ func (d *Database) GetMessagesAfterID(lastID int) ([]models.Message, error) {
 	return messages, nil
 }
 
-func (d *Database) GetTokenByMessageID(messageID string) (string, error) {
-	query := "SELECT token FROM messages WHERE message_id = ?"
+func (d *Database) GetTokenByMessageID(messageID string) (*models.Message, error) {
+	query := "SELECT message_id, coin, base_currency, platform, leverage, side, entries, margin, tp, sl, timestamp, `exit`, risk FROM messages WHERE message_id = ?"
 
-	var token string
-	err := d.db.QueryRow(query, messageID).Scan(&token)
+	message := models.Message{}
+	err := d.db.QueryRow(query, messageID).Scan(&message.MessageID, &message.Coin, &message.BaseCurrency, &message.Platform, &message.Leverage, &message.Side, &message.Entries, &message.Margin, &message.Tp, &message.SL, &message.Timestamp, &message.Exit, &message.Risk)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", nil
+			return nil, nil
 		}
-		return "", err
+		return nil, err
 	}
 
 	decreaseQuery := "UPDATE users SET `limit` = `limit` - 1"
 	_, err = d.db.Exec(decreaseQuery)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	return &message, nil
+}
+
+func (d *Database) AdminRetrieve() ([]models.Message, error) {
+	query := "SELECT message_id, coin, base_currency, platform, leverage, side, entries, margin, tp, sl, timestamp, `exit`, risk FROM messages"
+
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	messages := []models.Message{}
+	for rows.Next() {
+		var message models.Message
+		err := rows.Scan(&message.MessageID, &message.Coin, &message.BaseCurrency, &message.Platform, &message.Leverage, &message.Side, &message.Entries, &message.Margin, &message.Tp, &message.SL, &message.Timestamp, &message.Exit, &message.Risk)
+		if err != nil {
+			return nil, err
+		}
+
+		messages = append(messages, message)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return messages, nil
 }
 
 func (d *Database) AddHistory(token string, coins []string, request string) error {

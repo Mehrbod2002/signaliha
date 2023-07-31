@@ -13,7 +13,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-
+	gin.SetMode(gin.ReleaseMode)
 	store := cookie.NewStore([]byte("session"))
 	store.Options(sessions.Options{
 		Path:     "/",
@@ -25,13 +25,13 @@ func SetupRouter() *gin.Engine {
 	r.Use(sessions.Sessions("session", store))
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://127.0.0.1:3000"},
+		AllowOrigins:     []string{"http://signaliha.com:8080"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "HEAD"},
 		AllowHeaders:     []string{"Origin", "Cookie", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-			return origin == "http://127.0.0.1:3000"
+			return origin == "http://signaliha.com:8080"
 		},
 	}))
 
@@ -49,6 +49,7 @@ func SetupRouter() *gin.Engine {
 		admin.GET("/tokens", adminController.GetTokens)
 		admin.POST("/tokens/delete", adminController.DeleteTokens)
 		admin.GET("/tokens/:token/history", adminController.GetTokenHistory)
+		admin.GET("/coins", adminController.AdminRetrieve)
 	}
 
 	return r
@@ -59,7 +60,6 @@ func AdminAuthMiddleware() gin.HandlerFunc {
 		session := sessions.Default(c)
 		token := session.Get("session")
 		tokenString := c.GetHeader("Authorization")
-
 		if token == nil && tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":  http.StatusUnauthorized,

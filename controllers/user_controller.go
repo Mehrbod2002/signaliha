@@ -233,27 +233,33 @@ func (uc *UserController) GetTokenByMessageID(c *gin.Context) {
 		}
 		defer db.Close()
 
-		messageID := c.Param("messageID")
-
+		messageID := c.PostForm("id")
+		if messageID == "" {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "invalid id",
+			})
+			return
+		}
 		token, err := db.GetTokenByMessageID(messageID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"status":  http.StatusInternalServerError,
-				"message": "Failed to retrieve token",
+				"message": "Failed to retrieve last id",
 			})
 			return
 		}
 
-		if token != "" {
+		if token != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"status":  http.StatusOK,
-				"message": "Token retrieved successfully",
+				"message": "Signal retrieved successfully",
 				"data":    token,
 			})
 		} else {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  http.StatusNotFound,
-				"message": "Token not found",
+				"message": "Signal not found",
 			})
 		}
 	} else {

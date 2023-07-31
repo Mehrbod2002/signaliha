@@ -1,0 +1,7 @@
+{
+    "apps" : [{
+      "name"        : "arz",
+      "script"      : "./arz"
+    }]
+}
+
